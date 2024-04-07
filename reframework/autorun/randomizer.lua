@@ -25,6 +25,7 @@ Player = require("randomizer/Player")
 Scene = require("randomizer/Scene")
 Storage = require("randomizer/Storage")
 Typewriters = require("randomizer/Typewriters")
+Tools = require("randomizer/Tools")
 -- END globals
 
 
@@ -37,11 +38,11 @@ Typewriters = require("randomizer/Typewriters")
 
 
 re.on_pre_application_entry("UpdateBehavior", function()
-    if not Scene:isInGame() then
-        Archipelago.DisableInGameClient("Start a new game or load a file before connecting to AP.");
-    else
-        Archipelago.EnableInGameClient();
-    end
+    -- if not Scene:isInGame() then
+    --     Archipelago.DisableInGameClient("Start a new game or load a file before connecting to AP.");
+    -- else
+    --     Archipelago.EnableInGameClient();
+    -- end
 
     if Scene:isInGame() then 
         Archipelago.Init()
@@ -51,6 +52,10 @@ re.on_pre_application_entry("UpdateBehavior", function()
         if Archipelago.waitingForSync then
             Archipelago.waitingForSync = false
             Archipelago.Sync()
+        end
+
+        if Archipelago.CanReceiveItems() then
+            Archipelago.ProcessItemsQueue()
         end
     else
         Objectives.isInit = false -- look for the Purpose GUI again and destroy it
@@ -66,6 +71,10 @@ re.on_frame(function ()
     -- if Scene:isTitleScreen() then
     --     GUI.ShowRandomizerLogo()
     -- end
+
+    if reframework:is_drawing_ui() then
+        Tools.ShowGUI()
+    end
 
     if Scene:isInGame() then 
         GUI.CheckForAndDisplayMessages()

@@ -3,6 +3,9 @@ Archipelago.hasConnectedPrior = false -- keeps track of whether the player has c
 Archipelago.isInit = false -- keeps track of whether init things like handlers need to run
 Archipelago.waitingForSync = false -- randomizer calls APSync when "waiting for sync"; i.e., when you die
 
+Archipelago.itemsQueue = {}
+Archipelago.isProcessingItems = false -- this is set to true when the queue is being processed so we don't over-give
+
 -- set the game name in apclientpp
 AP_REF.APGameName = "Resident Evil 2 Remake"
 
@@ -57,13 +60,12 @@ end
 AP_REF.on_slot_connected = APSlotConnectedHandler
 
 function APSlotDisconnectedHandler()
-    log.debug("this is disconnecting now")
     GUI.AddText('Disconnected.')
 end
 AP_REF.on_socket_disconnected = APSlotDisconnectedHandler -- there's no "slot disconnected", so this is half as good
 
 function Archipelago.SlotDataHandler(slot_data)
-    Lookups.load(slot_data.character, slot_data.scenario)
+    Lookups.load(slot_data.character, slot_data.scenario, string.lower(slot_data.difficulty))
     Storage.Load()
 
     for t, typewriter_name in pairs(slot_data.unlocked_typewriters) do
@@ -79,7 +81,61 @@ end
 AP_REF.on_items_received = APItemsReceivedHandler
 
 function Archipelago.ItemsReceivedHandler(items_received)
+    local itemsWaiting = 0
+
+    -- add all of the randomized items to an item queue to wait for send
     for k, row in pairs(items_received) do
+        -- if the index of the incoming item is greater than the index of our last item at save, check to see if it's randomized
+        -- because ONLY non-randomized items escape the queue; everything else gets queued
+        if row["index"] ~= nil and (not Storage.lastSavedItemIndex or row["index"] > Storage.lastSavedItemIndex) then
+            local item_data = Archipelago._GetItemFromItemsData({ id = row["item"] })
+            local location_data = nil
+            local is_randomized = 1
+
+            if row["location"] ~= nil and row["location"] > 0 then
+                location_data = Archipelago._GetLocationFromLocationData({ id = row["location"] })
+
+                if location_data and location_data['raw_data']['randomized'] ~= nil then
+                    is_randomized = location_data['raw_data']['randomized']
+                end
+            end
+
+            if item_data["name"] and row["player"] ~= nil and is_randomized == 0 then
+                Archipelago.ReceiveItem(item_data["name"], row["player"], is_randomized)
+            else
+                table.insert(Archipelago.itemsQueue, row)
+                itemsWaiting = itemsWaiting + 1
+            end
+        end
+    end
+
+    if not Archipelago.CanReceiveItems() and itemsWaiting > 0 then
+        GUI.OnceText("Item(s) received, waiting for nearby item box.")
+    end
+end
+
+function Archipelago.CanReceiveItems()
+    -- wait until the player is in game, with AP connected, and with an available item box (that's not in use)
+    -- before sending any items over
+    return Scene.isInGame() and Archipelago.IsConnected() and ItemBox.GetAnyAvailable() ~= nil and not Scene.isUsingItemBox() 
+end
+
+function Archipelago.ProcessItemsQueue()
+    -- if we're already processing items, wait for that to finish
+    if Archipelago.isProcessingItems then
+        return
+    end
+
+    if #Archipelago.itemsQueue == 0 then
+        Archipelago.isProcessingItems = false
+        return
+    end
+
+    Archipelago.isProcessingItems = true
+    local items = Archipelago.itemsQueue
+    Archipelago.itemsQueue = {}
+
+    for k, row in pairs(items) do
         -- if the index of the incoming item is greater than the index of our last item at save, accept it
         if row["index"] ~= nil and (not Storage.lastSavedItemIndex or row["index"] > Storage.lastSavedItemIndex) then
             local item_data = Archipelago._GetItemFromItemsData({ id = row["item"] })
@@ -106,6 +162,7 @@ function Archipelago.ItemsReceivedHandler(items_received)
     end
 
     Storage.Update()
+    Archipelago.isProcessingItems = false -- unset for the next bit of processing
 end
 
 -- sent by server when locations are checked (collect, etc.?)
@@ -222,6 +279,7 @@ end
 function Archipelago.IsSentChessPanel(location_data)
     local location = Archipelago._GetLocationFromLocationData(location_data, true) -- include_sent_locations
     local scenario_suffix = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. ")"
+    local scenario_suffix_hardcore = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. "H)"
 
     if not location then
         return false
@@ -232,14 +290,27 @@ function Archipelago.IsSentChessPanel(location_data)
 
         for k, loc in pairs(Lookups.locations) do
             location_name_with_region = loc['region'] .. scenario_suffix .. " - " .. loc['name']
+            location_name_with_region_hardcore = loc['region'] .. scenario_suffix_hardcore .. " - " .. loc['name']
 
-            if location['name'] == location_name_with_region and loc['sent'] ~= nil and loc['sent'] then
+            if Lookups.difficulty == 'hardcore' and location['name'] == location_name_with_region_hardcore and loc['sent'] ~= nil and loc['sent'] then
+                return true
+            elseif location['name'] == location_name_with_region and loc['sent'] ~= nil and loc['sent'] then
                 return true
             end
         end
     end
 
     return false
+end
+
+function Archipelago.GetLocationName(location_data)
+    local location = Archipelago._GetLocationFromLocationData(location_data, true) -- include_sent_locations
+
+    if not location then
+        return ""
+    end
+
+    return location["name"]
 end
 
 function Archipelago.CheckForVictoryLocation(location_data)
@@ -270,7 +341,8 @@ function Archipelago.SendLocationCheck(location_data)
         -- StartArea/SherryRoom is the shotgun shell location at start of Labs that can *also* be a shotgun if you haven't gotten one
         -- and it's only 1 location so, if it's there, match it regardless of item object + parent object
         if (loc['item_object'] == location_data['item_object'] and loc['parent_object'] == location_data['parent_object'] and loc['folder_path'] == location_data['folder_path']) or
-            (string.find(loc['folder_path'], 'StartArea/SherryRoom') and string.find(location_data['folder_path'], 'StartArea/SherryRoom')) 
+            (string.find(loc['folder_path'], 'StartArea/SherryRoom') and string.find(location_data['folder_path'], 'StartArea/SherryRoom')) or 
+            (string.find(loc['folder_path'], 'StartArea/Sherry Room') and string.find(location_data['folder_path'], 'StartArea/Sherry Room')) 
         then
             loc['sent'] = true
             
@@ -384,6 +456,7 @@ function Archipelago._GetLocationFromLocationData(location_data, include_sent_lo
 
     local translated_location = {}
     local scenario_suffix = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. ")"
+    local scenario_suffix_hardcore = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. "H)"
 
     if location_data['id'] and not location_data['name'] then
         location_data['name'] = AP_REF.APClient:get_location_name(location_data['id'])
@@ -391,8 +464,14 @@ function Archipelago._GetLocationFromLocationData(location_data, include_sent_lo
 
     for k, loc in pairs(Lookups.locations) do
         location_name_with_region = loc['region'] .. scenario_suffix .. " - " .. loc['name']
+        location_name_with_region_hardcore = loc['region'] .. scenario_suffix_hardcore .. " - " .. loc['name']
 
-        if location_data['name'] == location_name_with_region then
+        if Lookups.difficulty == 'hardcore' and location_data['name'] == location_name_with_region_hardcore then
+            translated_location['name'] = location_name_with_region_hardcore
+            translated_location['raw_data'] = loc
+
+            break
+        elseif location_data['name'] == location_name_with_region then
             translated_location['name'] = location_name_with_region
             translated_location['raw_data'] = loc
 
@@ -403,9 +482,15 @@ function Archipelago._GetLocationFromLocationData(location_data, include_sent_lo
             -- StartArea/SherryRoom is the shotgun shell location at start of Labs that can *also* be a shotgun if you haven't gotten one
             -- and it's only 1 location so, if it's there, match it regardless of item object + parent object
             if (loc['item_object'] == location_data['item_object'] and loc['parent_object'] == location_data['parent_object'] and loc['folder_path'] == location_data['folder_path']) or
-                (loc['folder_path'] ~= nil and location_data['folder_path'] ~= nil and string.find(loc['folder_path'], 'StartArea/SherryRoom') and string.find(location_data['folder_path'], 'StartArea/SherryRoom')) 
+                (loc['folder_path'] ~= nil and location_data['folder_path'] ~= nil and string.find(loc['folder_path'], 'StartArea/SherryRoom') and string.find(location_data['folder_path'], 'StartArea/SherryRoom')) or 
+                (loc['folder_path'] ~= nil and location_data['folder_path'] ~= nil and string.find(loc['folder_path'], 'StartArea/Sherry Room') and string.find(location_data['folder_path'], 'StartArea/Sherry Room')) 
             then
-                translated_location['name'] = location_name_with_region
+                if loc['hardcore'] ~= nil and loc['hardcore'] then
+                    translated_location['name'] = location_name_with_region_hardcore
+                else
+                    translated_location['name'] = location_name_with_region
+                end
+
                 translated_location['raw_data'] = loc
 
                 break

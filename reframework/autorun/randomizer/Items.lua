@@ -103,6 +103,29 @@ function Items.SetupInteractHook()
                 return
             end
 
+            -- If we're starting Sherry's part, intercept the stuffed animal interact, send her right beside another trigger to load Orphanage fully,
+            --   then use that trigger (the next if below) to send her to the final cutscene
+            if item_name == 'sm73_727' then -- very beginning of Sherry section, interacting with stuffed animal  
+                item_positions:call('vanishItemAndSave()') -- skip the item stuff entirely
+
+                Player.WarpToPosition(Vector3f.new(54.11, 4.67, -210.19)) -- warp beside the crawl spot in the playroom
+
+                return
+            end
+
+            if item_name == 'OrphanAsylum_SetFlag_Tutorial_PL' then -- next convenient trigger for Sherry to hit after Orphanage loads
+                Player.WarpToPosition(Vector3f.new(47.86, 0.95, -205.94)) -- warp beside the final sherry cutscene
+
+                -- now, activate the final sherry cutscene
+                local sherryEnd = Scene.getSceneObject():findGameObject("OrphanAsylum_PlayEvent_EV400")
+                local sherryEndInteract = sherryEnd:call("getComponent(System.Type)", sdk.typeof(sdk.game_namespace("gimmick.action.InteractBehavior")))
+                local sherryEndFSM = sherryEndInteract:call("getTrigger", 0).Feedbacks[0]
+                sherryEndFSM:call("execute")
+                
+                return
+            end
+            -- END Sherry Skip
+        
             local isLocationRandomized = Archipelago.IsLocationRandomized(location_to_check)
             local isSentChessPanel = Archipelago.IsSentChessPanel(location_to_check)
 

@@ -352,7 +352,7 @@ local function main_menu()
 	if mainWindowVisible then
 		imgui.set_next_window_size(Vector2f.new(600, 300), 4)
 		if showMainWindow then
-			showMainWindow = imgui.begin_window("Archipelago REFramework", showMainWindow, nil)
+			showMainWindow = imgui.begin_window("Archipelago Client for REFramework", showMainWindow, nil)
 		else
 			imgui.begin_window("Archipelago REFramework", nil, nil)
 		end

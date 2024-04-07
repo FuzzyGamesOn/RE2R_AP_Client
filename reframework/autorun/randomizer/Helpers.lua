@@ -11,4 +11,9 @@ function Helpers.get_children(xform)
 	return children[1] and children
 end
 
+function Helpers.wait(seconds) 
+    local start = os.time() 
+    repeat until os.time() > start + seconds 
+end
+
 return Helpers

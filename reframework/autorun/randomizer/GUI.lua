@@ -70,6 +70,17 @@ function GUI.AddText(message, color)
     GUI.lastText = os.time()
 end
 
+-- Function for only having one message of this kind in the message list, so we don't spam it unnecessarily.
+function GUI.OnceText(message)
+    for k, v in pairs(GUI.textList) do
+        if v.message == message then
+            return
+        end
+    end
+
+    GUI.AddText(message)
+end
+
 -- receiving item from self or another player
 function GUI.AddReceivedItemText(item_object, sendingPlayer, selfPlayer, sentToBox)
     if sendingPlayer == selfPlayer then

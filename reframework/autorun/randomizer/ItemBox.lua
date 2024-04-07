@@ -1,6 +1,6 @@
 local ItemBox = {}
 
-function ItemBox._GetItemBox()
+function ItemBox.GetAnyAvailable()
     local scene = Scene.getSceneObject()
     local gimmick_objects = scene:call("findGameObjectsWithTag(System.String)", "Gimmick")
     
@@ -11,7 +11,12 @@ function ItemBox._GetItemBox()
         -- not checking if it *starts* with "ItemLocker" because Capcom likes to add crap to the beginning of the names (looking at you RE3R)
         -- (also, Lua is a terrible language with no modern features)
         if string.find(gimmickName, "ItemLocker") and string.find(gimmickName, "_control") then
-            return gimmick
+            local compGimmickControl = gimmick:call("getComponent(System.Type)", sdk.typeof(sdk.game_namespace("gimmick.action.GimmickControl")))
+
+            -- now, check if the item box has a map assigned and that map is active
+            if compGimmickControl ~= nil and compGimmickControl:get_field("_IsPairComplete") then
+                return gimmick
+            end
         end
     end
 
@@ -19,9 +24,10 @@ function ItemBox._GetItemBox()
 end
 
 function ItemBox.GetItems()
-    itemLocker = ItemBox._GetItemBox()
+    itemLocker = ItemBox.GetAnyAvailable()
     itemList = {}
 
+    -- check that the item box we got is actually available first
     if itemLocker ~= nil then
         gimmickItemLockerControlComponent = itemLocker:call("getComponent(System.Type)", sdk.typeof(sdk.game_namespace("gimmick.action.GimmickItemLockerControl")))
         storageItems = gimmickItemLockerControlComponent:get_field("StorageItems")
@@ -48,7 +54,7 @@ function ItemBox.GetItems()
 end
 
 function ItemBox.AddItem(itemId, weaponId, weaponParts, bulletId, count)
-    local itemLocker = ItemBox._GetItemBox()
+    local itemLocker = ItemBox.GetAnyAvailable()
 
     if itemLocker ~= nil then
         local gimmickItemLockerControlComponent = itemLocker:call("getComponent(System.Type)", sdk.typeof(sdk.game_namespace("gimmick.action.GimmickItemLockerControl")))

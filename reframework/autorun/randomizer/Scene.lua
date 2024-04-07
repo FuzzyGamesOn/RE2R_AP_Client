@@ -35,6 +35,14 @@ function Scene.getMainFlowManager()
     return Scene.mainFlowManager
 end
 
+function Scene.getGUIItemBox()
+    if Scene.guiItemBox ~= nil then
+        return Scene.guiItemBox
+    end
+
+    return Scene.getSceneObject():findGameObject("GUI_ItemBox")
+end
+
 function Scene.isTitleScreen()
     return Scene.getMainFlowManager():get_IsInTitle()
 end
@@ -45,6 +53,10 @@ end
 
 function Scene.isGameOver()
     return Scene.getMainFlowManager():get_IsInGameOver()
+end
+
+function Scene.isUsingItemBox()
+    return Scene.getGUIItemBox():get_DrawSelf() -- is the ItemBox GUI "drawn"?
 end
 
 function Scene.getCurrentLocation()

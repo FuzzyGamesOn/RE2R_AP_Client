@@ -114,6 +114,13 @@ function Typewriters.DisplayWarpMenu()
             imgui.same_line()
         end
     end
+
+    imgui.new_line()
+    imgui.new_line()
+
+    if imgui.button("Unlock All Typewriters") then
+        Typewriters.UnlockAll()
+    end
   
     -- Warping while Ada and triggering any cutscenes breaks the game
 
