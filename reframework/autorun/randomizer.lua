@@ -15,6 +15,7 @@ Manifest = require("randomizer/Manifest")
 Lookups = require("randomizer/Lookups")
 
 Archipelago = require("randomizer/Archipelago")
+CutsceneObjects = require("randomizer/CutsceneObjects")
 DestroyObjects = require("randomizer/DestroyObjects")
 GUI = require("randomizer/GUI")
 Helpers = require("randomizer/Helpers")
@@ -49,6 +50,7 @@ re.on_pre_application_entry("UpdateBehavior", function()
     if Scene:isInGame() then 
         Archipelago.Init()
         Items.Init()
+        CutsceneObjects.Init()
         DestroyObjects.Init()
         StartingWeapon.Init()
 
@@ -76,6 +78,7 @@ re.on_pre_application_entry("UpdateBehavior", function()
             Archipelago.wasDeathLinked = false
         end
     else
+        CutsceneObjects.isInit = false -- look for objects that should be destroyed and destroy them again
         DestroyObjects.isInit = false -- look for objects that should be destroyed and destroy them again
     end
 
