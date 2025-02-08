@@ -222,7 +222,7 @@ local function set_room_info_handler(callback)
 		debug_print("Room info")
 		callback()
 		
-		AP_REF.APClient:ConnectSlot(AP_REF.APSlot, AP_REF.APPassword, AP_REF.APItemsHandling, {"Lua-APClientPP"}, {0, 4, 4})
+		AP_REF.APClient:ConnectSlot(AP_REF.APSlot, AP_REF.APPassword, AP_REF.APItemsHandling, {"Lua-APClientPP"}, {0, 5, 0})
 	end
 	AP_REF.APClient:set_room_info_handler(room_info_handler)
 end
@@ -359,6 +359,8 @@ local function DisplayClientCommand(command)
 	end
 end
 
+
+-- I had a hard time reading this the way it was, so I restructured it a bit when I was trying to fix it. 
 local function main_menu()
 	if mainWindowVisible then
 		imgui.set_next_window_size(Vector2f.new(600, 300), 4)
@@ -380,7 +382,8 @@ local function main_menu()
         imgui.same_line()
         imgui.push_item_width(size.x / 5)
 
-		-- Host Input - Fields come before the textbox, so names are for the next field. 
+                -- Odd way of having the GUI since Host is attached to "Slot" and "Slot" to "Password" etc
+		-- Host Input  
 		changed, hostname = imgui.input_text("Slot:", AP_REF.APHost)
 		if changed then
 			AP_REF.APHost = hostname
@@ -397,7 +400,7 @@ local function main_menu()
 		imgui.same_line()
 
 		-- Password Input
-		changed, pass = imgui.input_text("", AP_REF.APPassword)
+		changed, pass = imgui.input_text(" ", AP_REF.APPassword)
 		if changed then
 			AP_REF.APPassword = pass
 		end
@@ -435,6 +438,11 @@ local function main_menu()
 			imgui.new_line()
 		end
 
+		-- Auto-scroll logic
+		if imgui.get_scroll_y() >= imgui.get_scroll_max_y() then
+			imgui.set_scroll_here_y(1.0)
+		end
+
 		imgui.pop_style_var()
 		imgui.end_child_window()
 
@@ -451,7 +459,7 @@ local function main_menu()
 
 		-- Send Button
 		if imgui.button("Send") then
-			if current_text and current_text ~= " " then
+			if current_text and current_text ~= "" then
 				if string.sub(current_text, 1, 1) == "/" then
 					DisplayClientCommand(string.sub(current_text, 2))
 				elseif AP_REF.APClient then
