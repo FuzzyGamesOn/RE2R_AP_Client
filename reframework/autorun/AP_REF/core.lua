@@ -359,6 +359,8 @@ local function DisplayClientCommand(command)
 	end
 end
 
+
+-- I had a hard time reading this the way it was, so I restructured it a bit when I was trying to fix it. 
 local function main_menu()
 	if mainWindowVisible then
 		imgui.set_next_window_size(Vector2f.new(600, 300), 4)
@@ -370,31 +372,42 @@ local function main_menu()
 
         if not AP_REF.clientEnabled then
             imgui.text(AP_REF.clientDisabledMessage or "Disabled by game.")
-
             return
         end
 
 		local size = imgui.get_window_size()
         local foo = ""
-        imgui.push_item_width(0.001) -- this makes the input effectively zero-width but preserves the padding for the label
-        imgui.input_text("Host:", foo) -- ^ it's dumb that we have to do this, and I hope imgui one day supports left-side labels (what a joke)
+        imgui.push_item_width(0.001) 
+        imgui.input_text("Host:", foo) 
         imgui.same_line()
         imgui.push_item_width(size.x / 5)
-		changed, hostname, _1, _2 = imgui.input_text("Slot:", AP_REF.APHost) -- imgui labels are displayed on the right (WHY?!), so this label is for the NEXT input
+
+                -- Odd way of having the GUI since Host is attached to "Slot" and "Slot" to "Password" etc
+		-- Host Input  
+		changed, hostname = imgui.input_text("Slot:", AP_REF.APHost)
 		if changed then
 			AP_REF.APHost = hostname
 		end
+
 		imgui.same_line()
-		changed, slotname, _1, _2 = imgui.input_text("Password:", AP_REF.APSlot) -- imgui labels are displayed on the right (WHY?!), so this label is for the NEXT input
+
+		-- Slotname Input
+		changed, slotname = imgui.input_text("Password:", AP_REF.APSlot)
 		if changed then
 			AP_REF.APSlot = slotname
 		end
+
 		imgui.same_line()
-		changed, pass, _1, _2 = imgui.input_text("", AP_REF.APPassword)
+
+		-- Password Input
+		changed, pass = imgui.input_text(" ", AP_REF.APPassword)
 		if changed then
 			AP_REF.APPassword = pass
 		end
+
 		imgui.same_line()
+
+		-- Connect/Disconnect Buttons
 		if connected then
 			if imgui.button("Disconnect") then
                 disconnect_client = true
@@ -405,12 +418,16 @@ local function main_menu()
 				APConnect(AP_REF.APHost)
 			end
 		end
+
 		imgui.pop_item_width()
 		imgui.separator()
+
+		-- Chat Log Display
 		imgui.begin_child_window("ScrollRegion", Vector2f.new(size.x-5, size.y-55), true, 0)
 		imgui.push_style_var(14, Vector2f.new(0,0))
+
 		for i, value in ipairs(textLog) do
-			for i, val in ipairs(value) do
+			for _, val in ipairs(value) do
                 if val["color"] == nil then
                     val["color"] = AP_REF.HexToImguiColor("FFFFFF")
                 end
@@ -419,32 +436,37 @@ local function main_menu()
 			end
 			imgui.new_line()
 		end
+
+		-- Auto-scroll logic
+		if imgui.get_scroll_y() >= imgui.get_scroll_max_y() then
+			imgui.set_scroll_here_y(1.0)
+		end
+
 		imgui.pop_style_var()
 		imgui.end_child_window()
 
-        -- None of the commands work except maybe say? So just remove the input box and button for sending commands for now.
-        --
-		-- imgui.text("Input:")
-		-- imgui.same_line()
-		-- imgui.push_item_width((size.x / 4)*3)
-		-- changed, input, _1, _2 = imgui.input_text("", current_text)
-		-- if changed then
-		-- 	current_text = input
-		-- end
-		-- imgui.same_line()
-		-- if imgui.button("Send") then
-		-- 	if current_text ~= "" then
-		-- 		if string.sub(current_text,1, 1) == "/" then
-		-- 			DisplayClientCommand(string.sub(current_text, 2))
-		-- 			current_text = ""
-		-- 		elseif ap ~= nil then
-		-- 			AP_REF.APClient:Say(current_text)
-		-- 			current_text = ""
-		-- 		end
-		-- 	end
-		-- end
-		-- imgui.pop_item_width()
+        -- Input Box & Send Button
+		imgui.text("Text Input:")
+		imgui.same_line()
+		imgui.push_item_width((size.x / 4) * 3)
+		changed, input = imgui.input_text("", current_text)
+		if changed then
+			current_text = input
+		end
 
+		imgui.same_line()
+
+		-- Send Button
+		if imgui.button("Send") then
+			if current_text and current_text ~= "" then
+				if AP_REF.APClient then
+					AP_REF.APClient:Say(current_text)
+				end
+				current_text = "" -- Clear input after sending
+			end
+		end
+
+		imgui.pop_item_width()
 		imgui.end_window()
 	end
 end
@@ -458,7 +480,7 @@ local function SaveConfig()
     config["APFillerColor"] = AP_REF.APFillerColor
     config["APTrapColor"] = AP_REF.APTrapColor
     config["APLocationColor"] = AP_REF.APLocationColor
-	config["APEntranceColor"] = AP_REF.APEntranceColor
+    config["APEntranceColor"] = AP_REF.APEntranceColor
 
     -- store last connection settings so they're restored on game relaunch
     config["APHost"] = AP_REF.APHost
