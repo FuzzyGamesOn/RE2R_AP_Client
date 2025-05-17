@@ -15,7 +15,7 @@ function CutsceneObjects.Init()
 end
 
 function CutsceneObjects.DispersalCartridge()
-    local dispersalObject = Helpers.gameObject("sm42_222_SprayingMachine01A_control")
+    local dispersalObject = Scene.getSceneObject():findGameObject("sm42_222_SprayingMachine01A_control")
     if not dispersalObject then
         return
     end
