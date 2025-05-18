@@ -1,7 +1,7 @@
 local Helpers = {}
 
 function Helpers.gameObject(obj_name)
-    return scene:findGameObject(obj_name)
+    return Scene.getSceneObject():findGameObject(obj_name)
 end
 
 function Helpers.component(obj, component_namespace)
