@@ -475,8 +475,8 @@ end
 
 function Archipelago.SanitizeLocationData(location_data)
     -- remove any character in an item or parent name that is not a letter, number, space, or a handful of symbols
-    location_data['item_object'] = location_data['item_object']:gsub("[^A-Za-z0-9()-_ ]", "")
-    location_data['parent_object'] = location_data['parent_object']:gsub("[^A-Za-z0-9()-_ ]", "")
+    location_data['item_object'] = location_data['item_object']:gsub("[^A-Za-z0-9()'-_ ]", "")
+    location_data['parent_object'] = location_data['parent_object']:gsub("[^A-Za-z0-9()'-_ ]", "")
 
     return location_data
 end
