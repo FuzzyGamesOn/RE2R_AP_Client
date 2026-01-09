@@ -73,7 +73,10 @@ function Lookups.Load(character, scenario, difficulty)
 
     if enemy_locations then
         for k, v in pairs(enemy_locations) do
-            table.insert(Lookups.locations, v)
+            -- only add enemies that haven't been "excluded" because they can be missed
+            if v['excluded'] == nil or v['excluded'] == 0 then
+                table.insert(Lookups.locations, v)
+            end
         end
     end
 end
