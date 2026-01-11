@@ -253,7 +253,8 @@
             "folder_path": "RopewayManagers/TemporaryObjects/Enemy",
             "condition": {
                 "items": ["Battery", "Electronic Gadget"]
-            }
+            },
+            "excluded": 1
     },
     {
             "name": "Hanging Zombie After It Drops",
@@ -716,7 +717,8 @@
             "folder_path": "RopewayManagers/TemporaryObjects/Enemy",
             "condition": {
                 "items": ["T-Bar Handle"]
-            }
+            },
+            "excluded": 1
     },
     {
             "name": "First G-Adult",
