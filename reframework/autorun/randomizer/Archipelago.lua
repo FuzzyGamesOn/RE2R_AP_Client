@@ -2,7 +2,9 @@ local Archipelago = {}
 Archipelago.seed = nil
 Archipelago.slot = nil
 Archipelago.apworld_version = nil -- comes over in slot data
+Archipelago.weapon_rando = nil -- comes over in slot data
 Archipelago.starting_weapon = nil -- comes over in slot data
+Archipelago.all_weapons = nil -- comes over in slot data
 Archipelago.ammo_pack_modifier = nil -- comes over in slot data
 Archipelago.ammo_pack_type_amount = {} -- used if pack modifier is "random by type"
 Archipelago.damage_traps_can_kill = false -- comes over in slot data
@@ -93,8 +95,16 @@ function Archipelago.SlotDataHandler(slot_data)
     Archipelago.seed = player["seed"]
     Archipelago.slot = player["slot"]
 
+    if slot_data.weapon_rando ~= nil then
+        Archipelago.weapon_rando = slot_data.weapon_rando
+    end
+
     if slot_data.starting_weapon ~= nil then
         Archipelago.starting_weapon = slot_data.starting_weapon
+    end
+
+    if slot_data.all_weapons ~= nil then
+        Archipelago.all_weapons = slot_data.all_weapons
     end
 
     if slot_data.apworld_version ~= nil then
