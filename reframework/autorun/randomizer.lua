@@ -20,6 +20,8 @@ DestroyObjects = require("randomizer/DestroyObjects")
 Enemy = require("randomizer/Enemy")
 GUI = require("randomizer/GUI")
 GUIInventory = require("randomizer/GUIInventory")
+GUISave = require("randomizer/GUISave")
+GUISync = require("randomizer/GUISync")
 Helpers = require("randomizer/Helpers")
 Inventory = require("randomizer/Inventory")
 ItemBox = require("randomizer/ItemBox")
@@ -27,6 +29,7 @@ ItemDuplicates = require("randomizer/ItemDuplicates")
 Items = require("randomizer/Items")
 Player = require("randomizer/Player")
 Records = require("randomizer/Records")
+SaveData = require("randomizer/SaveData")
 Scene = require("randomizer/Scene")
 StartingWeapon = require("randomizer/StartingWeapon")
 Storage = require("randomizer/Storage")
@@ -56,6 +59,7 @@ re.on_pre_application_entry("UpdateBehavior", function()
         Items.Init()
         CutsceneObjects.Init()
         DestroyObjects.Init()
+        SaveData.Init()
         StartingWeapon.Init()
         GUIInventory.Init()
         ItemDuplicates.Init()
@@ -98,9 +102,11 @@ re.on_pre_application_entry("UpdateBehavior", function()
             Archipelago:SendDeathLink()
         end
         
-        if not Archipelago.waitingForSync then
-            Archipelago.waitingForSync = true
-        end
+        -- now handled by SaveData load hook
+        --
+        -- if not Archipelago.waitingForSync then
+        --     Archipelago.waitingForSync = true
+        -- end
 
         Archipelago.didGameOver = true
     end
@@ -128,6 +134,8 @@ re.on_frame(function ()
 
     if Scene:isInGame() then 
         GUIInventory.CheckForAndDisplayMessages()
+        GUISave.CheckForAndDisplayMessages()
+        GUISync.CheckForAndDisplayMessages()
 
         -- only show the typewriter window when the user presses the reframework hotkey
         if reframework:is_drawing_ui() then

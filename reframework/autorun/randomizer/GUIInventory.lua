@@ -24,7 +24,7 @@ function GUIInventory.CheckForAndDisplayMessages()
     end
 
     imgui.set_next_window_pos({ 50, 350})
-    imgui.begin_window("Inventory Info", nil,
+    imgui.begin_window("Archipelago Inventory Info", nil,
         1 -- NoTitleBar
         | 2 -- NoResize
         | 4 -- NoMove
