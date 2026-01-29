@@ -19,6 +19,7 @@ Archipelago.didGameOver = false -- this gets set to true when we're killed, so t
 
 Archipelago.itemsQueue = {}
 Archipelago.isProcessingItems = false -- this is set to true when the queue is being processed so we don't over-give
+Archipelago.hasReceivedItemsBefore = false -- this is set to true when the items received handler is called for the first time on the current connection
 
 -- set the game name in apclientpp
 AP_REF.APGameName = "Resident Evil 2 Remake"
@@ -54,6 +55,7 @@ function Archipelago.Sync()
         return
     end
 
+    SaveData.lastSyncTimestamp = os.time()
     AP_REF.APClient:Sync()
 end
 
@@ -202,6 +204,8 @@ function Archipelago.ItemsReceivedHandler(items_received)
             })
         end
     end
+
+    Archipelago.hasReceivedItemsBefore = true
 end
 
 function Archipelago.CanReceiveItems()
@@ -892,6 +896,7 @@ function Archipelago.Reset()
     Archipelago.damage_traps_can_kill = false
     Archipelago.death_link = false
     Archipelago.itemsQueue = {}
+    Archipelago.hasReceivedItemsBefore = false
 end
 
 return Archipelago

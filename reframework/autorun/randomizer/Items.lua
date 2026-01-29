@@ -139,9 +139,11 @@ function Items.SetupInteractHook()
                 Storage.openedChiefDoor = true
             end
 
-            -- If we run through a trigger named "AutoSaveArea", the game just auto-saved. So update last saved to last received.
-            if string.find(item_name, "AutoSaveArea") then
-                Storage.UpdateLastSavedItems()
+            -- If we run through a trigger with "AutoSaveArea" or "CheckPoint" in the name, the game just auto-saved. 
+            --    So a save point and not an item, so return out. 
+            --    (Used to update last saved to last received, but handled in SaveData hooks now.)
+            if string.find(item_name, "AutoSaveArea") or string.find(item_name, "CheckPoint") then
+                -- Storage.UpdateLastSavedItems()
 
                 return
             end
