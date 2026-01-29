@@ -77,7 +77,9 @@ function Items.SetupInteractHook()
                     end
 
                     Typewriters.Unlock("", item_name)
-                    Storage.UpdateLastSavedItems()
+
+                    -- this used to update on touching the typewriter (assuming the player *would* save), but is now handled by a hook
+                    --Storage.UpdateLastSavedItems()
                 end
             end
         end
