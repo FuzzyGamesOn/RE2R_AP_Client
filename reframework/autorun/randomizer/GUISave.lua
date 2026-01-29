@@ -3,10 +3,6 @@ GUISave.font = "Prompt-Medium.ttf"
 GUISave.font_size = 24
 GUISave.pulse_counter = 0
 
-function GUISave.Init()
-    -- nothing?
-end
-
 function GUISave.CheckForAndDisplayMessages()
     -- if no last save timestamp, nothing to do
     if SaveData.lastSaveTimestamp == nil then

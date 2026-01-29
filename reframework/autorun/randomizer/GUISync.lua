@@ -3,10 +3,6 @@ GUISync.font = "Prompt-Medium.ttf"
 GUISync.font_size = 24
 GUISync.pulse_counter = 0
 
-function GUISync.Init()
-    -- nothing?
-end
-
 function GUISync.CheckForAndDisplayMessages()
     -- if no last save timestamp, nothing to do
     if SaveData.lastSyncTimestamp == nil then
