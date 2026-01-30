@@ -765,31 +765,6 @@ function Archipelago.SendVictory()
     AP_REF.APClient:StatusUpdate(AP_REF.AP.ClientStatus.GOAL)   
 end
 
-function Archipelago.GatekeepDifficultOptions()
-    -- if the rando isn't connected, or none of the problematic options are set, nothing to do
-    if not Archipelago.IsConnected() or (not Archipelago.death_link and not Archipelago.damage_traps_can_kill) then
-        return
-    end
-
-    -- if the player hasn't beaten at least 1 of the scenarios, any one of them, turn off expert-level options due to lack of player experience
-    if not (Records.hasBeatenLeonA() or Records.hasBeatenClaireA() or Records.hasBeatenLeonB() or Records.hasBeatenClaireB()) then
-        if Archipelago.death_link or Archipelago.damage_traps_can_kill then
-            GUI.AddText("Some advanced options are being disabled because ", "gray")
-            GUI.AddText("you haven't beaten the game before.", "gray")
-        end
-
-        if Archipelago.death_link then
-            GUI.AddText("Deathlink has been disabled.")
-            Archipelago.death_link = false
-        end
-
-        if Archipelago.damage_traps_can_kill then
-            GUI.AddText("Damage Traps Can Kill has been disabled.")
-            Archipelago.damage_traps_can_kill = false
-        end
-    end
-end
-
 function Archipelago._GetItemFromItemsData(item_data)
     local player = Archipelago.GetPlayer()
     local translated_item = {}
