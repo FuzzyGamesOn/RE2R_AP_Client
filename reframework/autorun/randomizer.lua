@@ -74,7 +74,6 @@ re.on_pre_application_entry("UpdateBehavior", function()
         end
 
         ItemBox.DedupeCheck()
-        Archipelago.GatekeepDifficultOptions()
 
         -- if the game randomly forgets that the player exists and tries to leave the invincibility flag on from item pickup,
         --   relentlessly check for the player existing until it does, then turn that flag off
