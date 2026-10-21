@@ -814,26 +814,14 @@ function Archipelago._GetLocationFromLocationData(location_data, include_sent_lo
     local scenario_suffix = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. ")"
     local scenario_suffix_hardcore = " (" .. string.upper(string.sub(Lookups.character, 1, 1) .. Lookups.scenario) .. "H)"
 
-    -- not sure when this is used
+    -- used during item receiving, where a location id comes with the item
     if location_data['id'] and not location_data['name'] then
         location_data['name'] = AP_REF.APClient:get_location_name(location_data['id'], player['game'])
-
-        return {
-            id = location_data['id'],
-            name = location_data['name'],
-            raw_data = {}
-        }
     end
 
     -- will be eventually used by killsanity, if not other things
     if location_data['name'] and not location_data['id'] then
         location_data['id'] = AP_REF.APClient:get_location_id(location_data['name'], player['game'])
-
-        return {
-            id = location_data['id'],
-            name = location_data['name'],
-            raw_data = {}
-        }
     end
 
     -- if the difficulty is hardcore, loop first looking for hardcore locations only so we can prioritize matching those
