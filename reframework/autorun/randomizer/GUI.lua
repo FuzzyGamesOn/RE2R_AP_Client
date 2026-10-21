@@ -213,13 +213,19 @@ function GUI.CheckVersionWarning()
 
     if not isCorrectVersion then
         GUI.AddTexts({
-            { message="Your apworld version and client version do not match.", color=AP_REF.HexToImguiColor('fa3d2f') },
-            { message="Your apworld version is " },
-            { message=Archipelago.apworld_version, color=AP_REF.HexToImguiColor("d9d904") },
-            { message=". " },
-            { message="Your client version is " },
+            { message="-------------------------------------------", color=AP_REF.HexToImguiColor("ff7878") }
+        })
+
+        GUI.AddTexts({
+            { message="This multiworld was generated using version " },
+            { message=Archipelago.apworld_version, color=AP_REF.HexToImguiColor("fc5656") },
+            { message=" . Your client is expecting version " },
             { message=Manifest.version, color=AP_REF.HexToImguiColor("d9d904") },
-            { message="." }
+            { message=" ." }
+        })
+
+        GUI.AddTexts({
+            { message="Regenerate the multiworld with the right apworld version, or downgrade your client to match what you already generated.", color=AP_REF.HexToImguiColor("ff7878") }
         })
     end
 
