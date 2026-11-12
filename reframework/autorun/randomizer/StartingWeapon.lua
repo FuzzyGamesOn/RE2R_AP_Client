@@ -55,6 +55,16 @@ function StartingWeapon.SwapTo(item_name)
             count = 1
         end
 
+        -- first, add the item to the received items list so the player can re-receive at any time
+        local receivedItemsIncludesThisItem = false
+        for k, v in pairs(Storage.receivedItemNames) do
+            if v == item_name then receivedItemsIncludesThisItem = true end
+        end
+        
+        if not receivedItemsIncludesThisItem then
+            table.insert(Storage.receivedItemNames, item_name)            
+        end
+        
         -- item ids 1 and 9 are the Matilda and SLS 60, or Leon's starting weapon and Claire's starting weapon, for both scenarios
         Inventory.SwapItem(nil, { 1, 9 }, tonumber(itemId), tonumber(weaponId), weaponParts, bulletId, tonumber(count))
 
