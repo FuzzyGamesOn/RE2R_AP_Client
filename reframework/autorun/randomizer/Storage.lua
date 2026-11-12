@@ -46,7 +46,10 @@ function Storage.Update()
         last_saved = Storage.lastSavedItemIndex, 
         talked_to_marvin = Storage.talkedToMarvin,
         opened_chief_door = Storage.openedChiefDoor,
-        finished_g1 = Storage.finishedG1,
+
+        -- Disabled until Secret Room return is re-enabled (see the note in CutsceneObjects.lua)
+        -- finished_g1 = Storage.finishedG1,
+
         swapped_starting_weapon = Storage.swappedStartingWeapon,
         typewriters_active = Storage.typewritersActive,
         received_item_names = Storage.receivedItemNames,
