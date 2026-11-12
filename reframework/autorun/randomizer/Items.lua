@@ -117,10 +117,12 @@ function Items.SetupInteractHook()
             end
 
             -- Maintenance room ladder after G1 fight
-            if item_name == "sm49_005_TerrainLadder_SherryLadder_control" and item_folder_path == "RopewayContents/World/Location_RPD_B1/LocationLevel_RPD_B1/LocationFsm_RPD_B1/S02_0400/AREA_G1/SherryLadder" then
-                GUI.AddText("You can return to RPD by walking through the closed Secret Room door.")
-                Storage.finishedG1 = true
-            end
+            -- Disabled until Secret Room return is re-enabled (see the note in CutsceneObjects.lua)
+            --
+            -- if item_name == "sm49_005_TerrainLadder_SherryLadder_control" and item_folder_path == "RopewayContents/World/Location_RPD_B1/LocationLevel_RPD_B1/LocationFsm_RPD_B1/S02_0400/AREA_G1/SherryLadder" then
+            --     GUI.AddText("You can return to RPD by walking through the closed Secret Room door.")
+            --     Storage.finishedG1 = true
+            -- end
 
             -- Inside the cable car that goes to Labs, on the Sewers side
             if item_name == "ScenarioNoAdovance_s05_0000" and item_folder_path == "RopewayContents/World/Location_WasteWater/LocationLevel_WasteWater/LocationFsm_WasteWater/common" then

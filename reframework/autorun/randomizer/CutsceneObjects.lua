@@ -7,9 +7,12 @@ function CutsceneObjects.Init()
         CutsceneObjects.isInit = true
         CutsceneObjects.DispersalCartridge()
 
-        if Storage.finishedG1 then
-            CutsceneObjects.ReturnToSecretRoom()  
-        end
+        -- Disabling Secret Room return until Claire works and 
+        --   goddess statue collision is more responsive to save loads (i.e., not getting people stuck pre-G1)
+        -- 
+        -- if Storage.finishedG1 then
+        --     CutsceneObjects.ReturnToSecretRoom()  
+        -- end
     end
 
     -- if the last check for cutscene objects was X time ago or more, trigger another removal
