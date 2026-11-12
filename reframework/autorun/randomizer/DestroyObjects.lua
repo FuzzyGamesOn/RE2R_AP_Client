@@ -10,6 +10,7 @@ function DestroyObjects.Init()
 
     -- if the last check for objects to remove was X time ago or more, trigger another removal
     if os.time() - DestroyObjects.lastRemoval > 15 then -- 15 seconds
+        DestroyObjects.lastRemoval = os.time()
         DestroyObjects.isInit = false
     end
 end
